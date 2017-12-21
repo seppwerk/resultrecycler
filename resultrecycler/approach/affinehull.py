@@ -8,9 +8,18 @@ from resultrecycler.approach.basic import Approach
 
 
 class AffineHull(Approach):
-    def __init__(self, config):
-        super().__init__(config)
-        self.fallback_approach = NearestNeighbor(config)
+    """
+    In a 2D x-y-Diagram: Connects closest x values and draws a line between the y values. The y value at the
+    required x is returned.
+
+    Mathematically more correct: Find the closest coordinates, which produce an affine hull for the given coordinates
+    and return the value above the given coordinates which lies in the plane of the affine hull.
+
+    Read my thesis for more details...
+    """
+    def __init__(self):
+        super().__init__()
+        self.fallback_approach = NearestNeighbor()
 
     def guess(self, data, candidate):
         approach_base = AffineBase()

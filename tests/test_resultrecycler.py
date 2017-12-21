@@ -1,17 +1,12 @@
 #!/usr/bin/python
 
-
-#!/usr/bin/python
-
 from unittest import TestCase, TestSuite, defaultTestLoader
 
 from numpy import array, testing
 from converter.typecheck import TypeCheck
-from data import RawData
+from data import SampleData
 
-from result_recycler import ResultRecycler
-from resultrecycler.converter.vector import ScalarConverter, NdArrayConverter, ListConverter, TupleConverter, \
-    DictConverter
+from .context import rr
 
 
 class ResultRecyclerTest(TestCase):
@@ -26,7 +21,7 @@ class ResultRecyclerTest(TestCase):
         cls.approach_class = approach_class
 
     def setUp(self):
-        self.rr = ResultRecycler(self.raw_limit, self.metric, self.approach_class)
+        self.rr = rr.ResultRecycler(self.raw_limit, self.metric, self.approach_class)
 
     def test_correct_results(self):
         for dat, cand, exp in zip(self.datas, self.candidates, self.results):
@@ -46,18 +41,18 @@ class ResultRecyclerTestSuite(TestSuite):
         super().__init__()
 
         converter_tests = [single_test] if single_test is not None else [
-            {'name': 'SingleAffine', 'datas': [RawData(1, 2), RawData(1.8, 3)],
+            {'name': 'SingleAffine', 'datas': [SampleData(1, 2), SampleData(1.8, 3)],
              'candidates': [2, 2], 'results': [2, 3.25]},
-            {'name': 'SingleDer1', 'datas': [RawData(1, 2, 3), RawData(1.8, 4, 1)],
+            {'name': 'SingleDer1', 'datas': [SampleData(1, 2, 3), SampleData(1.8, 4, 1)],
              'candidates': [2, 2], 'results': [5, 4.2]},
-            {'name': 'SingleDer2', 'datas': [RawData(1, 2, 3, 4), RawData(1.8, 4, 1, 2)],
+            {'name': 'SingleDer2', 'datas': [SampleData(1, 2, 3, 4), SampleData(1.8, 4, 1, 2)],
              'candidates': [2, 2], 'results': [7, 4.24]},
-            {'name': 'MultiAffine', 'datas': [RawData([1, 1], [2, 2])],
+            {'name': 'MultiAffine', 'datas': [SampleData([1, 1], [2, 2])],
              'candidates': [[1.5, 1.5]], 'results': [[2, 2]]},
-            {'name': 'MultiDer1', 'datas': [RawData([1, 1], [2, 2], [[2, 2], [2, 2]])],
+            {'name': 'MultiDer1', 'datas': [SampleData([1, 1], [2, 2], [[2, 2], [2, 2]])],
              'candidates': [[1.5, 1.5]], 'results': [[4, 4]]},
-            {'name': 'MultiDer2', 'datas': [RawData([1, 1], [2, 2], [[2, 2], [2, 2]],
-                                                           [[[3, 3], [3, 3]], [[3, 3], [3, 3]]])],
+            {'name': 'MultiDer2', 'datas': [SampleData([1, 1], [2, 2], [[2, 2], [2, 2]],
+                                                       [[[3, 3], [3, 3]], [[3, 3], [3, 3]]])],
              'candidates': [[1.5, 1.5]], 'results': [[5.5, 5.5]]},
         ]
 

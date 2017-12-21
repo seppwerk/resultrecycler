@@ -2,13 +2,14 @@
 
 from unittest import TestCase, TestSuite, defaultTestLoader
 from numpy import array
-from converter.vector import NdArrayConverter
-from metric.metrics import SumMetric, EuclidianMetric, CubicMetric, MaxMetric, PMetric
+
+from tests.context import rr
+from tests.context import rr_converter_vector
 
 
 class MockConfig:
     def __init__(self):
-        self.coordinate_converter = NdArrayConverter(array([1, 2]))
+        self.coordinate_converter = rr_converter_vector.NdArrayConverter(array([1, 2]))
 
 
 class TestMetricSkeleton(TestCase):
@@ -74,16 +75,16 @@ class MetricTestSuite(TestSuite):
     def __init__(self, single_test=None):
         TestSuite.__init__(self)
 
-        class P4Metric(PMetric):
+        class P4Metric(rr.PMetric):
             def __init__(self, *args, **kwargs):
                 super().__init__(4, *args, **kwargs)
 
         metric_tests = [single_test] if single_test is not None else [
-            {'metric_class': SumMetric, 'unweighted_distance': 7, 'weighted_distance': 16},
-            {'metric_class': EuclidianMetric, 'unweighted_distance': 5, 'weighted_distance': 12.649110640673518},
-            {'metric_class': CubicMetric, 'unweighted_distance': 4.497941445, 'weighted_distance': 12.146355887502651},
+            {'metric_class': rr.SumMetric, 'unweighted_distance': 7, 'weighted_distance': 16},
+            {'metric_class': rr.EuclidianMetric, 'unweighted_distance': 5, 'weighted_distance': 12.649110640673518},
+            {'metric_class': rr.CubicMetric, 'unweighted_distance': 4.497941445, 'weighted_distance': 12.1463558875027},
             {'metric_class': P4Metric, 'unweighted_distance': 4.28457229495381, 'weighted_distance': 12.0368667937382},
-            {'metric_class': MaxMetric, 'unweighted_distance': 4, 'weighted_distance': 12},
+            {'metric_class': rr.MaxMetric, 'unweighted_distance': 4, 'weighted_distance': 12},
         ]
 
         for test in metric_tests:

@@ -2,12 +2,12 @@
 
 from unittest import TextTestRunner
 
-from tests.test_approach.test_approaches import ApproachTestSuite
-from tests.test_converter.test_jacobian import JacobianConverterTestSuite
-from tests.test_converter.test_vector import VectorConverterTestSuite
+from tests.test_approaches import ApproachTestSuite
+from tests.test_jacobian_converter import JacobianConverterTestSuite
 from tests.test_limit import LimitImportTestSuite
-from tests.test_metric.test_metrics import MetricTestSuite
+from tests.test_metrics import MetricTestSuite
 from tests.test_resultrecycler import ResultRecyclerTestSuite
+from tests.test_vector_converter import VectorConverterTestSuite
 
 TextTestRunner().run(VectorConverterTestSuite())
 TextTestRunner().run(JacobianConverterTestSuite())

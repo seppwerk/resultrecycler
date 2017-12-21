@@ -4,7 +4,7 @@ from enum import Enum
 from functools import total_ordering
 
 from converter import VectorConverter, DerivativeConverter
-from data import Data, JacobianData, HessianData, CandidateData
+from data import ValueData, JacobianData, HessianData, CandidateData
 
 
 @total_ordering
@@ -23,7 +23,7 @@ class Config:
     def __init__(self, init_data):
         self._init_information(init_data)
         self.candidate_class = CandidateData
-        self.data_class = Data
+        self.data_class = ValueData
         self.coordinate_converter = VectorConverter.select(init_data.coordinates, 'coordinates')
         self.value_converter = VectorConverter.select(init_data.values, 'values')
         self.jacobian_converter = None
@@ -35,8 +35,7 @@ class Config:
             if self.information is Information.SecondDerivative:
                 self.data_class = HessianData
                 self.hessian_converter = self.jacobian_converter
-        self.candidate_class.prepare(coordinate_converter=self.coordinate_converter,
-                                     value_converter=self.value_converter)
+        self.candidate_class.prepare(coordinate_converter=self.coordinate_converter, value_converter=self.value_converter)
         self.data_class.prepare(coordinate_converter=self.coordinate_converter, value_converter=self.value_converter,
                                 jacobian_converter=self.jacobian_converter, hessian_converter=self.hessian_converter)
 

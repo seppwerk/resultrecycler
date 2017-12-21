@@ -4,27 +4,26 @@ from unittest import TestCase, TestSuite, defaultTestLoader
 
 from numpy import array, testing
 
-from resultrecycler.converter.vector import ScalarConverter, NdArrayConverter, ListConverter, TupleConverter, \
-    DictConverter, UnsupportedTypeError, VectorConverter
+from tests.context import rr_converter_vector as rr_vector
 
 
 class VectorConverterFailTest(TestCase):
     def test_fail(self):
-        self.assertRaises(UnsupportedTypeError, VectorConverter.select, {2, 3.5}, 'testing')
+        self.assertRaises(rr_vector.UnsupportedTypeError, rr_vector.VectorConverter.select, {2, 3.5}, 'testing')
 
 
 class VectorConverterTest(TestCase):
     @classmethod
-    def init(cls, converter_class, raw_data, conv_data, dim, keys):
+    def init(cls, converter_class, sample_data, conv_data, dim, keys):
         cls.name = converter_class.__name__
         cls.converter_class = converter_class
-        cls.raw_data = raw_data
+        cls.sample_data = sample_data
         cls.conv_data = conv_data
         cls.dim = dim
         cls.keys = keys
 
     def setUp(self):
-        self.converter = VectorConverter.select(self.raw_data, 'testing')
+        self.converter = rr_vector.VectorConverter.select(self.sample_data, 'testing')
 
     def test_correct_converter(self):
         res = type(self.converter)
@@ -32,23 +31,23 @@ class VectorConverterTest(TestCase):
         self.assertEqual(res, exp, '{}: Wrong converter: {} instead of {}'.format(self.name, res, exp))
 
     def test_raw_conversion(self):
-        res = self.converter.read(self.raw_data)
+        res = self.converter.read(self.sample_data)
         exp = self.conv_data
         testing.assert_array_equal(res, exp, '{}: Wrong raw import: {} instead of {}'.format(self.name, res, exp))
 
     def test_back_conversion_data(self):
         res = self.converter.export(self.conv_data)
-        exp = self.raw_data
-        if isinstance(self.raw_data, (int, float)):
+        exp = self.sample_data
+        if isinstance(self.sample_data, (int, float)):
             self.assertEqual(res, exp, '{}: Wrong export: {} instead of {}'.format(self.name, res, exp))
         else:
             testing.assert_array_equal(res, exp, '{}: Wrong export: {} instead of {}'.format(self.name, res, exp))
 
     def test_back_conversion_type(self):
-        if isinstance(self.raw_data, (int, float)):
+        if isinstance(self.sample_data, (int, float)):
             return
         res = type(self.converter.export(self.conv_data))
-        exp = type(self.raw_data)
+        exp = type(self.sample_data)
         self.assertEqual(res, exp, '{}: Wrong export type: {} instead of {}'.format(self.name, res, exp))
 
     def test_dim(self):
@@ -70,15 +69,15 @@ class VectorConverterTestSuite(TestSuite):
             self.addTest(defaultTestLoader.loadTestsFromTestCase(VectorConverterFailTest))
 
         converter_tests = [single_test] if single_test is not None else [
-            {'converter_class': ScalarConverter, 'raw_data': 2.5, 'conv_data': array([2.5]),
+            {'converter_class': rr_vector.ScalarConverter, 'sample_data': 2.5, 'conv_data': array([2.5]),
              'dim': 1, 'keys': (0, )},
-            {'converter_class': NdArrayConverter, 'raw_data': array([2, 3.5]), 'conv_data': array([2, 3.5]),
+            {'converter_class': rr_vector.NdArrayConverter, 'sample_data': array([2, 3.5]), 'conv_data': array([2, 3.5]),
              'dim': 2, 'keys': (0, 1)},
-            {'converter_class': ListConverter, 'raw_data': [2, 3.5], 'conv_data': array([2, 3.5]),
+            {'converter_class': rr_vector.ListConverter, 'sample_data': [2, 3.5], 'conv_data': array([2, 3.5]),
              'dim': 2, 'keys': (0, 1)},
-            {'converter_class': TupleConverter, 'raw_data': (2, 3.5), 'conv_data': array([2, 3.5]),
+            {'converter_class': rr_vector.TupleConverter, 'sample_data': (2, 3.5), 'conv_data': array([2, 3.5]),
              'dim': 2, 'keys': (0, 1)},
-            {'converter_class': DictConverter, 'raw_data': {'a': 2, 'b': 3.5}, 'conv_data': array([2, 3.5]),
+            {'converter_class': rr_vector.DictConverter, 'sample_data': {'a': 2, 'b': 3.5}, 'conv_data': array([2, 3.5]),
              'dim': 2, 'keys': ('a', 'b')},
         ]
 

@@ -7,8 +7,11 @@ from config import Information
 
 
 class FirstDerivative(Approach):
-    def __init__(self, config):
-        super().__init__(config)
+    """
+    Uses a first degree taylor polynomial from the closest sample.
+    """
+    def __init__(self):
+        super().__init__()
         self.required_information = Information.FirstDerivative
 
     def guess(self, data, candidate):
@@ -18,8 +21,11 @@ class FirstDerivative(Approach):
 
 
 class SecondDerivative(FirstDerivative):
-    def __init__(self, config):
-        super().__init__(config)
+    """
+    Uses a second degree taylor polynomial from the closest sample.
+    """
+    def __init__(self):
+        super().__init__()
         self.required_information = Information.SecondDerivative
 
     def guess(self, data, candidate):

@@ -9,7 +9,6 @@ class InsuffientDataException(AttributeError):
     def __init__(self, approach, config):
         super().__init__('Insuffient data: approach {} requires {} but only {} is available'.format(
             approach.name, approach.required_information, config.information))
-        #TODO enum with names??
 
 
 class ApproachChooser:
@@ -18,11 +17,11 @@ class ApproachChooser:
         if approach_class is not None and config.information < approach_class.required_information:
             raise InsuffientDataException(approach_class, config)
         elif approach_class is not None:
-            return approach_class(config)
+            return approach_class()
         else:
             if config.information >= Information.SecondDerivative:
-                return SecondDerivative(config)
+                return SecondDerivative()
             elif config.information >= Information.FirstDerivative:
-                return FirstDerivative(config)
+                return FirstDerivative()
             else:
-                return AffineHull(config)
+                return AffineHull()

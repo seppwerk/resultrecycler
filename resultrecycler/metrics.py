@@ -1,13 +1,22 @@
 #!/usr/bin/python
 
-from numpy import zeros, array
+from numpy import array
 from numpy.core.umath import cbrt
 from numpy.ma import sqrt
+
 from converter.typecheck import TypeCheck
 
 
 class Metric:
-    # TODO Weigths and Bounds dependend on config
+    """
+    Base class for metrics.
+    Includes a proper implementation for given weights or bounds to have self.weights filled with either 1 (unweighted)
+    or different weights for each coordinate.
+    Includes also the implementation for distance calculation of this metric.
+    The only thing, which needs to be overridden is the calc(self, a, b) method.
+    """
+
+    # TODO Weigths and Bounds dependent on config
     def __init__(self, weights_or_bounds=None):
         self._raw_weights = weights_or_bounds
         self.weights = None
@@ -29,6 +38,7 @@ class Metric:
         results.sort()
 
     def calc(self, a, b):
+        """This method contains the actual distance calculation between a and b"""
         raise NotImplementedError('Calculation of metric needs to be specified')
 
 

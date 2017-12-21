@@ -2,7 +2,8 @@
 
 from unittest import TestCase, TestSuite, defaultTestLoader
 
-from limits import Limit, RawLimit
+from .context import rr
+from .context import rr_limits as rl
 
 
 class TestLimitImport(TestCase):
@@ -23,7 +24,7 @@ class TestLimitImport(TestCase):
         cls.raw_limit = raw_limit
 
     def setUp(self):
-        self.limit = Limit(self.raw_limit)
+        self.limit = rl.Limit(self.raw_limit)
 
     def isIn(self, item, container, field):
         self.assertIn(item, container, '{}: Missing {}: {} not in {}'.format(self.name, field, item, container))
@@ -93,46 +94,51 @@ class LimitImportTestSuite(TestSuite):
         TestSuite.__init__(self)
 
         mixed_tests = [
-            {'name': 'Enumerable', 'raw_limit': RawLimit([1, 2.25], [5, 4.75], [3, 3.5], [3, 4.4], [[5, 5.5], [6.1]])},
-            {'name': 'Dictionary', 'raw_limit': RawLimit({'b': 2.25, 'a': 1}, {'a': 5, 'b': 4.75}, {'b': 3.5, 'a': 3},
-                                                         [3, 4.4], {'a': [5, 5.5], 'b': [6.1]})},
-            {'name': 'EnumKeys', 'raw_limit': RawLimit([1, 2.25], [5, 4.75], [3, 3.5], [3, 4.4], [[5, 5.5], [6.1]])},
-            {'name': 'DictKeys', 'raw_limit': RawLimit({'b': 2.25, 'a': 1}, {'a': 5, 'b': 4.75}, {'b': 3.5, 'a': 3},
-                                                       [3, 4.4], {'a': [5, 5.5], 'b': [6.1]}, ['b', 'a'])},
-            {'name': 'NoDefault', 'raw_limit': RawLimit([1, 2.25], [5, 4.75], None, [3, 4.4], [[5, 5.5], [6.1]])},
-            {'name': 'NoCommon', 'raw_limit': RawLimit([1, 2.25], [5, 4.75], [3, 3.5],
-                                                       None, [[3, 4.4, 5, 5.5], [3, 4.4, 6.1]])},
-            {'name': 'NoIndividual', 'raw_limit': RawLimit([1, 2.25], [5, 4.75], [3, 3.5],
-                                                           [3, 4.4, 5, 5.5, 6.1])},
+            {'name': 'Enumerable',
+             'raw_limit': rr.RawLimit([1, 2.25], [5, 4.75], [3, 3.5], [3, 4.4], [[5, 5.5], [6.1]])},
+            {'name': 'Dictionary',
+             'raw_limit': rr.RawLimit({'b': 2.25, 'a': 1}, {'a': 5, 'b': 4.75}, {'b': 3.5, 'a': 3},
+                                      [3, 4.4], {'a': [5, 5.5], 'b': [6.1]})},
+            {'name': 'EnumKeys',
+             'raw_limit': rr.RawLimit([1, 2.25], [5, 4.75], [3, 3.5], [3, 4.4], [[5, 5.5], [6.1]])},
+            {'name': 'DictKeys',
+             'raw_limit': rr.RawLimit({'b': 2.25, 'a': 1}, {'a': 5, 'b': 4.75}, {'b': 3.5, 'a': 3},
+                                      [3, 4.4], {'a': [5, 5.5], 'b': [6.1]}, ['b', 'a'])},
+            {'name': 'NoDefault',
+             'raw_limit': rr.RawLimit([1, 2.25], [5, 4.75], None, [3, 4.4], [[5, 5.5], [6.1]])},
+            {'name': 'NoCommon',
+             'raw_limit': rr.RawLimit([1, 2.25], [5, 4.75], [3, 3.5], None, [[3, 4.4, 5, 5.5], [3, 4.4, 6.1]])},
+            {'name': 'NoIndividual',
+             'raw_limit': rr.RawLimit([1, 2.25], [5, 4.75], [3, 3.5], [3, 4.4, 5, 5.5, 6.1])},
         ]
 
         for test in mixed_tests:
             self.add_test(test, TestLimitImport)
 
         same_tests = [
-            {'name': 'EnumBase', 'raw_limit': RawLimit(2.25, 4.75, 3.5, [3, 4.4, 5, 5.5], value_keys=[1, 0])},
-            {'name': 'EnumCount', 'raw_limit': RawLimit(2.25, 4.75, 3.5, [3, 4.4, 5, 5.5], value_keys=2)},
-            {'name': 'EnumNoDef', 'raw_limit': RawLimit(2.25, 4.75, None, [3, 4.4, 5, 5.5], value_keys=[1, 0])},
-            {'name': 'EnumMin', 'raw_limit': RawLimit([2.25, 2.25], 4.75, 3.5, [3, 4.4, 5, 5.5])},
-            {'name': 'EnumMax', 'raw_limit': RawLimit(2.25, [4.75, 4.75], 3.5, [3, 4.4, 5, 5.5])},
-            {'name': 'EnumDef', 'raw_limit': RawLimit(2.25, 4.75, [3.5, 3.5], [3, 4.4, 5, 5.5])},
-            {'name': 'EnumFix', 'raw_limit': RawLimit(2.25, 4.75, 3.5, [3, 4.4], [[5, 5.5], [5, 5.5]])},
-            {'name': 'DictBase', 'raw_limit': RawLimit(2.25, 4.75, 3.5, [3, 4.4, 5, 5.5], value_keys=['b', 'a'])},
-            {'name': 'DictNoDef', 'raw_limit': RawLimit(2.25, 4.75, None, [3, 4.4, 5, 5.5], value_keys=['b', 'a'])},
-            {'name': 'DictMin', 'raw_limit': RawLimit({'a': 2.25, 'b': 2.25}, 4.75, 3.5, [3, 4.4, 5, 5.5])},
-            {'name': 'DictMax', 'raw_limit': RawLimit(2.25, {'a': 4.75, 'b': 4.75}, 3.5, [3, 4.4, 5, 5.5])},
-            {'name': 'DictDef', 'raw_limit': RawLimit(2.25, 4.75, {'a': 3.5, 'b': 3.5}, [3, 4.4, 5, 5.5])},
-            {'name': 'DictFix', 'raw_limit': RawLimit(2.25, 4.75, 3.5, [3, 4.4], {'b': [5, 5.5], 'a': [5, 5.5]})},
+            {'name': 'EnumBase', 'raw_limit': rr.RawLimit(2.25, 4.75, 3.5, [3, 4.4, 5, 5.5], value_keys=[1, 0])},
+            {'name': 'EnumCount', 'raw_limit': rr.RawLimit(2.25, 4.75, 3.5, [3, 4.4, 5, 5.5], value_keys=2)},
+            {'name': 'EnumNoDef', 'raw_limit': rr.RawLimit(2.25, 4.75, None, [3, 4.4, 5, 5.5], value_keys=[1, 0])},
+            {'name': 'EnumMin', 'raw_limit': rr.RawLimit([2.25, 2.25], 4.75, 3.5, [3, 4.4, 5, 5.5])},
+            {'name': 'EnumMax', 'raw_limit': rr.RawLimit(2.25, [4.75, 4.75], 3.5, [3, 4.4, 5, 5.5])},
+            {'name': 'EnumDef', 'raw_limit': rr.RawLimit(2.25, 4.75, [3.5, 3.5], [3, 4.4, 5, 5.5])},
+            {'name': 'EnumFix', 'raw_limit': rr.RawLimit(2.25, 4.75, 3.5, [3, 4.4], [[5, 5.5], [5, 5.5]])},
+            {'name': 'DictBase', 'raw_limit': rr.RawLimit(2.25, 4.75, 3.5, [3, 4.4, 5, 5.5], value_keys=['b', 'a'])},
+            {'name': 'DictNoDef', 'raw_limit': rr.RawLimit(2.25, 4.75, None, [3, 4.4, 5, 5.5], value_keys=['b', 'a'])},
+            {'name': 'DictMin', 'raw_limit': rr.RawLimit({'a': 2.25, 'b': 2.25}, 4.75, 3.5, [3, 4.4, 5, 5.5])},
+            {'name': 'DictMax', 'raw_limit': rr.RawLimit(2.25, {'a': 4.75, 'b': 4.75}, 3.5, [3, 4.4, 5, 5.5])},
+            {'name': 'DictDef', 'raw_limit': rr.RawLimit(2.25, 4.75, {'a': 3.5, 'b': 3.5}, [3, 4.4, 5, 5.5])},
+            {'name': 'DictFix', 'raw_limit': rr.RawLimit(2.25, 4.75, 3.5, [3, 4.4], {'b': [5, 5.5], 'a': [5, 5.5]})},
         ]
 
         for test in same_tests:
             self.add_test(test, TestSameLimitImport)
 
         scalar_tests = [
-            {'name': 'ScalarKey', 'raw_limit': RawLimit(2.25, 4.75, 3.5, [3, 4.4, 5, 5.5], value_keys=[0])},
-            {'name': 'ScalarCount', 'raw_limit': RawLimit(2.25, 4.75, 3.5, [3, 4.4, 5, 5.5], value_keys=1)},
-            {'name': 'ScalarBase', 'raw_limit': RawLimit(2.25, 4.75, 3.5, [3, 4.4, 5, 5.5])},
-            {'name': 'ScalarNoDef', 'raw_limit': RawLimit(2.25, 4.75, None, [3, 4.4, 5, 5.5])},
+            {'name': 'ScalarKey', 'raw_limit': rr.RawLimit(2.25, 4.75, 3.5, [3, 4.4, 5, 5.5], value_keys=[0])},
+            {'name': 'ScalarCount', 'raw_limit': rr.RawLimit(2.25, 4.75, 3.5, [3, 4.4, 5, 5.5], value_keys=1)},
+            {'name': 'ScalarBase', 'raw_limit': rr.RawLimit(2.25, 4.75, 3.5, [3, 4.4, 5, 5.5])},
+            {'name': 'ScalarNoDef', 'raw_limit': rr.RawLimit(2.25, 4.75, None, [3, 4.4, 5, 5.5])},
         ]
 
         for test in scalar_tests:
