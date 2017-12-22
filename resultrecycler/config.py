@@ -3,8 +3,8 @@
 from enum import Enum
 from functools import total_ordering
 
-from converter import VectorConverter, DerivativeConverter
-from data import ValueData, JacobianData, HessianData, CandidateData
+from .converter import VectorConverter, DerivativeConverter
+from .data import ValueData, JacobianData, HessianData, CandidateData
 
 
 @total_ordering

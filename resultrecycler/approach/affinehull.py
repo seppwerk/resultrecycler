@@ -3,8 +3,7 @@
 from numpy import array, dot, zeros, argmax, allclose
 from numpy.core.umath import equal, absolute
 from numpy.linalg import solve
-from approach.basic import NearestNeighbor
-from resultrecycler.approach.basic import Approach
+from .basic import Approach, NearestNeighbor
 
 
 class AffineHull(Approach):

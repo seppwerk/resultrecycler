@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from numpy import array
-from converter.typecheck import ConverterType, TypeCheck, WrongDimensionError, DifferentKeyError, UnsupportedTypeError
+from .typecheck import ConverterType, TypeCheck, WrongDimensionError, DifferentKeyError, UnsupportedTypeError
 
 
 class DerivativeConverter:
@@ -10,8 +10,8 @@ class DerivativeConverter:
         self.dim_v = dim_v
         self.keys_c = keys_c
         self.keys_v = keys_v
-        self.jac_shape = (self.dim_c, self.dim_v)
-        self.hess_shape = (self.dim_c, self.dim_v, self.dim_v)
+        self.jac_shape = (self.dim_v, self.dim_c)
+        self.hess_shape = (self.dim_v, self.dim_c, self.dim_c)
         self.validate(coordinate_converter, value_converter)
 
     def read(self, value_reader, data):
@@ -52,26 +52,26 @@ class DerivativeConverter:
                 'coordinate_converter': coordinate_converter,
                 'value_converter': value_converter}
 
-        if coordinate_converter.dim == 1 and coordinate_converter.type is ConverterType.scalar:
+        if value_converter.dim == 1 and value_converter.type is ConverterType.scalar:
             if TypeCheck.is_scalar(init_data):
                 return ScalarScalarConverter(**data)
-            if value_converter.type is ConverterType.enumerable:
-                return ScalarEnumConverter(**data)
-            elif value_converter.type is ConverterType.keys:
-                return ScalarKeyConverter(**data)
-        elif coordinate_converter.type is ConverterType.enumerable:
-            if TypeCheck.is_scalar(init_data[0]):
+            if coordinate_converter.type is ConverterType.enumerable:
                 return EnumScalarConverter(**data)
-            elif value_converter.type is ConverterType.enumerable:
-                return EnumEnumConverter(**data)
-            elif value_converter.type is ConverterType.keys:
-                return EnumKeyConverter(**data)
-        elif coordinate_converter.type is ConverterType.keys:
-            if TypeCheck.is_scalar(init_data[next(iter(init_data))]):
+            elif coordinate_converter.type is ConverterType.keys:
                 return KeyScalarConverter(**data)
-            elif value_converter.type is ConverterType.enumerable:
+        elif value_converter.type is ConverterType.enumerable:
+            if TypeCheck.is_scalar(init_data[0]):
+                return ScalarEnumConverter(**data)
+            elif coordinate_converter.type is ConverterType.enumerable:
+                return EnumEnumConverter(**data)
+            elif coordinate_converter.type is ConverterType.keys:
                 return KeyEnumConverter(**data)
-            elif value_converter.type is ConverterType.keys:
+        elif value_converter.type is ConverterType.keys:
+            if TypeCheck.is_scalar(init_data[next(iter(init_data))]):
+                return ScalarKeyConverter(**data)
+            elif coordinate_converter.type is ConverterType.enumerable:
+                return EnumKeyConverter(**data)
+            elif coordinate_converter.type is ConverterType.keys:
                 return KeyKeyConverter(**data)
         raise UnsupportedTypeError('Jacobian Data could not be converted', init_data)
 
@@ -80,87 +80,85 @@ class ScalarCoordinatesConverter(DerivativeConverter):
     def __init__(self, **kwargs):
         super().__init__(dim_c=1, keys_c=(0, ), **kwargs)
 
-    def read(self, value_reader, data):
-        return [value_reader(data)]
-
-
 class EnumCoordinatesConverter(DerivativeConverter):
     def __init__(self, dim_c, **kwargs):
         super().__init__(dim_c=dim_c, keys_c=tuple(range(dim_c)), **kwargs)
-
-    def read(self, value_reader, data):
-        return [value_reader(line) for line in data]
-
 
 class KeyCoordinatesConverter(DerivativeConverter):
     def __init__(self, dict_c, **kwargs):
         super().__init__(dim_c=len(dict_c.keys()), keys_c=tuple(sorted(dict_c.keys())), **kwargs)
 
-    def read(self, value_reader, data):
-        return [value_reader(data[key]) for key in self.keys_c]
+    def read_jac_values(self, jacobian_values):
+        return [jacobian_values[key] for key in self.keys_c]
+
+    def read_hess_values(self, hessian_values):
+        return [hessian_values[key1, key2] for key1 in self.keys_c for key2 in self.keys_c]
 
 
 class ScalarValuesConverter(DerivativeConverter):
     def __init__(self, **kwargs):
         super().__init__(dim_v=1, keys_v=(0, ), **kwargs)
 
+    def read(self, value_reader, data):
+        return [value_reader(data)]
+
 
 class EnumValuesConverter(DerivativeConverter):
     def __init__(self, dim_v, **kwargs):
         super().__init__(dim_v=dim_v, keys_v=tuple(range(dim_v)), **kwargs)
+
+    def read(self, coordinate_reader, data):
+        return [coordinate_reader(line) for line in data]
 
 
 class KeyValuesConverter(DerivativeConverter):
     def __init__(self, dict_v, **kwargs):
         super().__init__(dim_v=len(dict_v.keys()), keys_v=tuple(sorted(dict_v.keys())), **kwargs)
 
-    def read_jac_values(self, jacobian_values):
-        return [jacobian_values[key] for key in self.keys_v]
-
-    def read_hess_values(self, hessian_values):
-        return [hessian_values[key1, key2] for key1 in self.keys_v for key2 in self.keys_v]
+    def read(self, coordinate_reader, data):
+        return [coordinate_reader(data[key]) for key in self.keys_v]
 
 
-class ScalarScalarConverter(ScalarCoordinatesConverter, ScalarValuesConverter):
+class ScalarScalarConverter(ScalarValuesConverter, ScalarCoordinatesConverter):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
 
-class ScalarEnumConverter(ScalarCoordinatesConverter, EnumValuesConverter):
-    def __init__(self, init_data, **kwargs):
-        super().__init__(dim_v=len(init_data), **kwargs)
-
-
-class ScalarKeyConverter(ScalarCoordinatesConverter, KeyValuesConverter):
-    def __init__(self, init_data, **kwargs):
-        super().__init__(dict_v=init_data, **kwargs)
-
-
-class EnumScalarConverter(EnumCoordinatesConverter, ScalarValuesConverter):
+class EnumScalarConverter(ScalarValuesConverter, EnumCoordinatesConverter):
     def __init__(self, init_data, **kwargs):
         super().__init__(dim_c=len(init_data), **kwargs)
 
 
-class EnumEnumConverter(EnumCoordinatesConverter, EnumValuesConverter):
-    def __init__(self, init_data, **kwargs):
-        super().__init__(dim_c=len(init_data), dim_v=len(init_data[0]), **kwargs)
-
-
-class EnumKeyConverter(EnumCoordinatesConverter, KeyValuesConverter):
-    def __init__(self, init_data, **kwargs):
-        super().__init__(dim_c=len(init_data), dict_v=(init_data[0]), **kwargs)
-
-
-class KeyScalarConverter(KeyCoordinatesConverter, ScalarValuesConverter):
+class KeyScalarConverter(ScalarValuesConverter, KeyCoordinatesConverter):
     def __init__(self, init_data, **kwargs):
         super().__init__(dict_c=init_data, **kwargs)
 
 
-class KeyEnumConverter(KeyCoordinatesConverter, EnumValuesConverter):
+class ScalarEnumConverter(EnumValuesConverter, ScalarCoordinatesConverter):
     def __init__(self, init_data, **kwargs):
-        super().__init__(dict_c=init_data, dim_v=len(init_data[next(iter(init_data))]), **kwargs)
+        super().__init__(dim_v=len(init_data), **kwargs)
 
 
-class KeyKeyConverter(KeyCoordinatesConverter, KeyValuesConverter):
+class EnumEnumConverter(EnumValuesConverter, EnumCoordinatesConverter):
     def __init__(self, init_data, **kwargs):
-        super().__init__(dict_c=init_data, dict_v=init_data[next(iter(init_data))], **kwargs)
+        super().__init__(dim_v=len(init_data), dim_c=len(init_data[0]), **kwargs)
+
+
+class KeyEnumConverter(EnumValuesConverter, KeyCoordinatesConverter):
+    def __init__(self, init_data, **kwargs):
+        super().__init__(dim_v=len(init_data), dict_c=(init_data[0]), **kwargs)
+
+
+class ScalarKeyConverter(KeyValuesConverter, ScalarCoordinatesConverter):
+    def __init__(self, init_data, **kwargs):
+        super().__init__(dict_v=init_data, **kwargs)
+
+
+class EnumKeyConverter(KeyValuesConverter, EnumCoordinatesConverter):
+    def __init__(self, init_data, **kwargs):
+        super().__init__(dict_v=init_data, dim_c=len(init_data[next(iter(init_data))]), **kwargs)
+
+
+class KeyKeyConverter(KeyValuesConverter, KeyCoordinatesConverter):
+    def __init__(self, init_data, **kwargs):
+        super().__init__(dict_v=init_data, dict_c=init_data[next(iter(init_data))], **kwargs)
