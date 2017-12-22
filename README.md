@@ -4,6 +4,8 @@ A little tool to predict results of calculation based on historical results.
 
 Not a lot of magic here, but useful to get good start values for simulations and sometimes nice in sequential optimization.
 
+If you use it for your own research, please cite [this](http://dx.doi.org/10.14279/depositonce-5915).
+
 A short demo:
 
 ```python
