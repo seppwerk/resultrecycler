@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
-from approach import ApproachChooser, NearestNeighbor
-from config import Config
-from data import CandidateData
-from limits import Limit, RawLimit
-from metrics import EuclidianMetric
+from .approach import ApproachChooser, NearestNeighbor
+from .config import Config
+from .data import CandidateData
+from .limits import Limit, RawLimit
+from .metrics import EuclidianMetric
 
 
 class ResultRecycler:

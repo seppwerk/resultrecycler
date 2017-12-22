@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from numpy import array
-from converter.typecheck import TypeCheck, UnsupportedTypeError, ConverterType
+from .typecheck import TypeCheck, UnsupportedTypeError, ConverterType
 
 
 class VectorConverter:

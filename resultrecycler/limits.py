@@ -4,7 +4,7 @@ import sys
 
 from numpy import array, ones
 
-from converter.typecheck import TypeCheck
+from .converter.typecheck import TypeCheck
 
 
 class DefaultValues:

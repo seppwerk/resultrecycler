@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-from converter.vector import VectorConverter
-from converter.derivative import DerivativeConverter
+from .vector import VectorConverter
+from .derivative import DerivativeConverter
 
 
 __all__ = [

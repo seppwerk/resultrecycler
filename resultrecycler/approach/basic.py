@@ -2,7 +2,7 @@
 
 from numpy import ones
 
-from config import Information
+from ..config import Information
 
 
 class Approach:

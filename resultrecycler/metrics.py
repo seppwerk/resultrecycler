@@ -4,7 +4,7 @@ from numpy import array
 from numpy.core.umath import cbrt
 from numpy.ma import sqrt
 
-from converter.typecheck import TypeCheck
+from .converter.typecheck import TypeCheck
 
 
 class Metric:

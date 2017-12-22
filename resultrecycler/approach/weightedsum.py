@@ -2,7 +2,7 @@
 
 from numpy import zeros
 
-from resultrecycler.approach import Approach
+from .basic import Approach
 
 
 class WeightedSumApproach(Approach):

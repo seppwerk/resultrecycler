@@ -2,7 +2,7 @@
 
 from resultrecycler.approach.affinehull import AffineHull
 from resultrecycler.approach.derivative import FirstDerivative, SecondDerivative
-from config import Information
+from ..config import Information
 
 
 class InsuffientDataException(AttributeError):

@@ -2,8 +2,8 @@
 
 from numpy import dot
 
-from resultrecycler.approach.basic import Approach
-from config import Information
+from .basic import Approach
+from ..config import Information
 
 
 class FirstDerivative(Approach):
@@ -31,4 +31,4 @@ class SecondDerivative(FirstDerivative):
     def guess(self, data, candidate):
         pivot = data[0]
         delta = candidate.coordinates - pivot.coordinates
-        return pivot.values + dot(pivot.jacobian, delta) + dot(dot(delta, pivot.hessian), delta) * 0.5
+        return pivot.values + dot(pivot.jacobian, delta) + dot(dot(pivot.hessian, delta), delta) * 0.5
