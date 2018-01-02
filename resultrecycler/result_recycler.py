@@ -2,7 +2,7 @@
 
 from .approach import ApproachChooser, NearestNeighbor
 from .config import Config
-from .data import CandidateData
+from .data import CandidateData, SampleData
 from .limits import Limit, RawLimit
 from .metrics import EuclidianMetric
 
@@ -38,12 +38,24 @@ class ResultRecycler:
         neighbor_values = self._nearest_neighbor_approach.guess(self._data)
         return self._limit.choose_values(approach_values, neighbor_values)
 
-    def add_data(self, sample_data):
+    def add_data(self, sample_data_or_coordinates, values=None, jacobian=None, hessian=None):
         """
         Adds a new set of sample data. Should always have the same format (dimensions, derivatives, etc.)
         Will complete the configuration of result recycler on first run.
-        :param sample_data: The new set of sample data
+        It can either a SampleData object be used or coordinates, values, jacobian, hessian directly given
+        :param sample_data_or_coordinates: The new set of sample data if SampleData object is used or coordinate data
+        :param values: Value data
+        :param jacobian: Jacobian (first ordered by values, then by coordinates)
+        :param hessian: Hessian (first ordered by values, then twice by coordinates)
         """
+        if isinstance(sample_data_or_coordinates, SampleData):
+            self._add_data(sample_data_or_coordinates)
+        elif hasattr(sample_data_or_coordinates, 'coordinates') and hasattr(sample_data_or_coordinates, 'values'):
+            self._add_data(sample_data_or_coordinates)
+        else:
+            self._add_data(SampleData(sample_data_or_coordinates, values, jacobian, hessian))
+
+    def _add_data(self, sample_data):
         if not self._data:
             self._configure(sample_data)
         self._data.append(self._config.data_class(sample_data))

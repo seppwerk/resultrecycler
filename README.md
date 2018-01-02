@@ -30,23 +30,23 @@ def hessian(a, b, c):
 samples = [[1, 2, 3], [6, 5, 7], [4, 3, 8], [7, 5, 2], [4, 7, 3], [6, 7, 4]]
 guess = [3, 4, 5]
 
-print('Correct result:', func(*guess))
+print('Correct result:', func(*guess))  # [187 112]
 
 rr = ResultRecycler()
 for sample in samples:
-    rr.add_data(SampleData(sample, func(*sample)))
+    rr.add_data(sample, func(*sample))
 
-print('Guess without derivatives:', rr.calculate(guess))
-
-rr = ResultRecycler()
-for sample in samples:
-    rr.add_data(SampleData(sample, func(*sample), jacobian(*sample)))
-
-print ('Guess with first derivative:', rr.calculate(guess))
+print('Guess without derivatives:', rr.calculate(guess))  # [471.75 106.75]
 
 rr = ResultRecycler()
 for sample in samples:
-    rr.add_data(SampleData(sample, func(*sample), jacobian(*sample), hessian(*sample)))
+    rr.add_data(sample, func(*sample), jacobian(*sample))
 
-print ('Guess with second derivative:', rr.calculate(guess))
+print ('Guess with first derivative:', rr.calculate(guess))  # [184 125]
+
+rr = ResultRecycler()
+for sample in samples:
+    rr.add_data(sample, func(*sample), jacobian(*sample), hessian(*sample))
+
+print ('Guess with second derivative:', rr.calculate(guess))  # [193 103]
 ```
